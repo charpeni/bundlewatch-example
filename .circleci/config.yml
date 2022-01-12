@@ -1,0 +1,74 @@
+version: 2.1
+
+working_directory: &working_directory ~/bundlewatch-example
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:16.13
+    working_directory: *working_directory
+
+commands:
+  save-cache-yarn:
+    steps:
+      - save_cache:
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+  restore-cache-yarn:
+    steps:
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+  install-yarn-dependencies:
+    steps:
+      - run:
+          name: Yarn version
+          command: yarn -v
+      - run:
+          name: Yarn Install
+          command: |
+            yarn install --frozen-lockfile --no-progress --non-interactive --cache-folder ~/.cache/yarn
+  persist-to-workspace:
+    steps:
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  attach-workspace:
+    steps:
+      - attach_workspace:
+          at: *working_directory
+
+jobs:
+  checkout:
+    executor: node
+    steps:
+      - checkout
+      - restore-cache-yarn
+      - install-yarn-dependencies
+      - save-cache-yarn
+      - persist-to-workspace
+  build:
+    executor: node
+    steps:
+      - attach-workspace
+      - run: yarn build
+      - persist-to-workspace
+  bundlewatch:
+    executor: node
+    steps:
+      - attach-workspace
+      - run: yarn bundlewatch
+
+workflows:
+  tests:
+    jobs:
+      - checkout
+      - build:
+          requires:
+            - checkout
+      - bundlewatch:
+          requires:
+            - build
