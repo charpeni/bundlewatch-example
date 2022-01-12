@@ -1,4 +1,5 @@
 module.exports = {
+  normalizeFilenames: /^.+?(\.\w+)\.js$/, // anything(.hash).js
   files: [
     {
       path: "build/static/js/*.js",
