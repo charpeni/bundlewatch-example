@@ -38,5 +38,12 @@
   },
   "devDependencies": {
     "bundlewatch": "^0.3.2"
+  },
+  "bundlewatch": {
+    "ci": {
+      "trackBranches": [
+        "main"
+      ]
+    }
   }
 }
