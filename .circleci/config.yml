@@ -58,8 +58,6 @@ jobs:
       - persist-to-workspace
   bundlewatch:
     executor: node
-    environment:
-      - CI_BASE_BRANCH: main
     steps:
       - attach-workspace
       - run: yarn bundlewatch
